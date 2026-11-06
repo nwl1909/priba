@@ -19,7 +19,6 @@ using Microsoft.VisualBasic;
 using Action = CTFAK.CCN.Chunks.Frame.Action;
 using Constants = CTFAK.CCN.Constants;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using CTFAK.Core.Properties;
 using CTFAK.Core.CCN.Chunks.Banks;
 using CTFAK.MMFParser.EXE.Loaders.Events.Parameters;
