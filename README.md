@@ -29,7 +29,7 @@ CTFAK 2.3 is more unstable than CTFAK 2.2, thus this README will only be referri
 
 # Compilation
 ## Dependencies
-CTFAK 2.0 required [.NET 6.0's Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
+CTFAK 2.0 now targets **.NET 8** (`net8.0-windows`). Install the [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) to build, or the .NET 8 Desktop Runtime to run.
 
 After running the x64 installer, you may proceed with the compilation.
 
@@ -42,6 +42,10 @@ On the GitHub branch, click `Code` and copy the HTTPS URL.
 In Visual Studio 2022, under `Get started`, click `Clone a repository`, then paste the HTTPS URL from earlier. Input your desired path and press `Clone`.
 
 ## Compiling CTFAK 2.0
+
+Quick way: run `build.ps1` in PowerShell. It builds everything into `dist/` (CLI + `Plugins/`). Then extract `ctfakrequirements.zip` into `dist/`.
+
+Visual Studio way:
 
 Right click the solution on the right and press `Build Solution` or do it through the key bind `Control + Shift + B`, then right click the solution once again and press `Open Folder in File Explorer`.
 

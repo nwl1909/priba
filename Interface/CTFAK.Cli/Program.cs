@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,15 +17,27 @@ public class Program
     public static string builddate = "7/17/23";
     public static bool didToolArg = false;
 
+    static Type[] LoadPluginTypes(string file)
+    {
+        try
+        {
+            return Assembly.LoadFrom(Path.GetFullPath(file)).GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            return ex.Types.Where(t => t != null).ToArray()!;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Skipping plugin {Path.GetFileName(file)}: {ex.Message}");
+            return Array.Empty<Type>();
+        }
+    }
+
     public static void Main(string[] args)
     {
-        var processModule = Process.GetCurrentProcess().MainModule;
-        if (processModule != null)
-        {
-            var pathToExe = processModule.FileName;
-            var pathToContentRoot = Path.GetDirectoryName(pathToExe);
-            Directory.SetCurrentDirectory(pathToContentRoot);
-        }
+        // AppContext.BaseDirectory works for framework-dependent, self-contained and single-file builds
+        Directory.SetCurrentDirectory(AppContext.BaseDirectory);
         CTFAK.CTFAKCore.Init();
         ASCIIArt.SetStatus("Idle");
         Directory.CreateDirectory("Plugins");
@@ -53,7 +65,7 @@ public class Program
             if (!args.Contains("-path"))
             {
                 Console.Write("Game path: ");
-                path = Console.ReadLine().Trim('"');
+                path = (Console.ReadLine() ?? string.Empty).Trim().Trim('"');
             }
             else
             {
@@ -80,7 +92,7 @@ public class Program
             if (!args.Contains("-path"))
             {
                 Console.Write("Parameters: ");
-                CTFAKCore.parameters = Console.ReadLine();
+                CTFAKCore.parameters = Console.ReadLine() ?? string.Empty;
             }
             else
             {
@@ -122,8 +134,7 @@ public class Program
                         availableReaders.Add((IFileReader)Activator.CreateInstance(rawType));
                 foreach (var item in Directory.GetFiles("Plugins", "*.dll"))
                 {
-                    var newAsm = Assembly.LoadFrom(Path.GetFullPath(item));
-                    foreach (var pluginType in newAsm.GetTypes())
+                    foreach (var pluginType in LoadPluginTypes(item))
                         if (pluginType.GetInterface(typeof(IFileReader).FullName) != null)
                             availableReaders.Add((IFileReader)Activator.CreateInstance(pluginType));
                 }
@@ -135,7 +146,11 @@ public class Program
                 for (int i = 0; i < availableReaders.Count; i++)
                     Console.WriteLine($"{i + 1}. {availableReaders[i].Name}");
                 var key1 = Console.ReadLine();
-                var readerSelect = int.Parse(key1);
+                if (!int.TryParse(key1, out var readerSelect) || readerSelect < 0 || readerSelect > availableReaders.Count)
+                {
+                    availableReaders.Clear();
+                    goto SELECT_READER;
+                }
                 if (readerSelect == 0) Environment.Exit(0);
                 gameParser = availableReaders[readerSelect - 1];
             }
@@ -193,8 +208,7 @@ public class Program
         }
         foreach (var item in Directory.GetFiles("Plugins","*.dll"))
         {
-            var newAsm = Assembly.LoadFrom(Path.GetFullPath(item));
-            foreach (var pluginType in newAsm.GetTypes())
+            foreach (var pluginType in LoadPluginTypes(item))
             {
                 if (pluginType.GetInterface(typeof(IFusionTool).FullName) != null)
                     availableTools.Add((IFusionTool)Activator.CreateInstance(pluginType));
@@ -220,7 +234,11 @@ public class Program
                 Console.WriteLine($"{i + 1}. {availableTools[i].Name}");
             }
             var key = Console.ReadLine();
-            var toolSelect = int.Parse(key);
+            if (!int.TryParse(key, out var toolSelect) || toolSelect < 0 || toolSelect > availableTools.Count)
+            {
+                Console.WriteLine("Invalid selection");
+                goto SELECT_TOOL;
+            }
             if (toolSelect == 0) Environment.Exit(0);
             IFusionTool selectedTool = availableTools[toolSelect - 1];
             Console.WriteLine($"Selected tool: {selectedTool.Name}. Executing");

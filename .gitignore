@@ -361,4 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/Core/CTFAK.Core/CTFAK.Core.csproj
+
+# Native runtime libs are shipped with ctfakrequirements.zip, not tracked
+
+# Local build output
+dist/
